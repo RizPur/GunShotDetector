@@ -1,24 +1,19 @@
 import logo from './logo.svg';
 import './App.css';
+import React from 'react'
+import { useEffect, useState, useRef } from 'react';
+import Appbar from './Components/Appbar';
+import Jamaica from './Components/Jamaica';
 
-function App() {
+const centers =  {ja: [18.19368269899244, -77.39527725784035]}
+
+const App = () => {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Appbar />
+      <Jamaica centers={centers}/>
+    </>
   );
 }
 
