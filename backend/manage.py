@@ -1,1 +1,0 @@
-#idk ntn about Django and what files are necessary so this is placeholder for backend folder
