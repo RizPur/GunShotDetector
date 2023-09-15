@@ -2,12 +2,13 @@ import React from "react";
 import {Button, Box, TextField, AppBar, Toolbar, Typography} from '@mui/material'
 
 
-const Appbar = ()=>{
+const Appbar = ({flyMap})=>{
     return (
         <div id="app-bar">
             <Box sx={{ flexGrow: 1 }}>
             <AppBar position='static'>
                 <Toolbar sx={{minHeight: '48px'}}>
+                <Button variant='contained' sx={{backgroundColor:'orange'}} onClick={flyMap}>Fly Away</Button>
                 <Box sx={{ flexGrow: 1 }}></Box>
                 <Typography
                     sx={{
