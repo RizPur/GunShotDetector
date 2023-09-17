@@ -1,7 +1,7 @@
 import React from "react";
 import { Divider, ListItemButton, ListItemText, Typography } from '@mui/material';
 
-const RecentGunShots = ({setGunShot, gunShot}) =>{
+const RecentGunShots = ({setGunShot, gunShot, flyMap}) =>{
 
     return(
         <>
@@ -9,6 +9,7 @@ const RecentGunShots = ({setGunShot, gunShot}) =>{
                 onClick={() => {
                 setGunShot(gunShot);
                 console.log(gunShot);
+                flyMap(gunShot.geo[0], gunShot.geo[1], 11)
                 }}>
                 <ListItemText 
                 primary={gunShot.location} 
