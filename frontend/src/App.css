@@ -41,3 +41,11 @@
     transform: rotate(360deg);
   }
 }
+
+#main-modal{
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  padding: 10px;
+  z-index: 500;
+}

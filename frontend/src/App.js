@@ -2,15 +2,28 @@ import './App.css';
 import React from 'react'
 import Appbar from './Components/Appbar';
 import Nav from './Components/Nav';
+import GunChart from './Components/GunChart';
 import { jaData } from './Data/jaData';
 import { MapContainer, TileLayer, useMap, Polygon } from 'react-leaflet';
 import { useEffect, useState } from 'react';
+import { Box, Modal, Typography, Paper} from '@mui/material';
 
 
 const centers =  {
   ja: [18.19368269899244, -77.39527725784035]
 };
 
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
 
 const App = () => {
   const [region, setRegion] = useState(centers.ja);
@@ -22,14 +35,15 @@ const App = () => {
     location: "RockFort",
     geo: [18, -77],
     probs: {
-      AK12 : 0,
-      M4: 0,
-      IMI: 0,
-      MP5: 0,
+      AK12 : 0.1,
+      M4: 0.3,
+      IMI: 0.4,
+      MP5: 0.2,
       Other: 0
     }
   })
   const [gunShots, setGunShots] = useState([])
+  const [show, setShow] = useState(false)
 
   useEffect(() => {
     const fakeGunShots = [
@@ -77,8 +91,16 @@ const flyMap = (x, y, zoom) => {
 
   return (
     <>
-      <Appbar flyMap={flyMap} setZoomTo={setZoomTo} />
-      <Nav gunShots={gunShots} setGunShots={setGunShots} setGunShot={setGunShot} flyMap={flyMap}/>
+      <Appbar flyMap={flyMap} setZoomTo={setZoomTo} setShow={setShow} />
+      <Nav setShow={setShow} gunShots={gunShots} setGunShots={setGunShots} setGunShot={setGunShot} flyMap={flyMap}/>
+      <Modal open={show} onClose={()=>{setShow(false)}}>
+        <Box style={style}>
+         <Paper style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', padding: '20px' }}>
+          <GunChart gunShot={gunShot} />
+          </Paper>
+        </Box>
+      </Modal>
+
       <MapContainer center={centers.ja} zoom={7} style={{width: '100vw', height: '100vh'}} scrollWheelZoom={false} zoomControl={false}> 
         <SetMap zoomTo={zoomTo}/>
         <TileLayer
@@ -126,9 +148,7 @@ const flyMap = (x, y, zoom) => {
                 // setFilterParish('')
                 // setShow(false);
                 console.log("zoom to", parish.id);
-                // setLogBar(logBar)
-                // setFilterParish(parish.id)
-                // console.log(getCount(parish.id, logs))
+
                 }
             }}
             />)

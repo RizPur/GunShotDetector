@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Box, AppBar, Toolbar, Typography} from '@mui/material'
 
 
-const Appbar = ({flyMap})=>{
+const Appbar = ({flyMap, setShow})=>{
     return (
         <div id="app-bar">
             <Box sx={{ flexGrow: 1 }}>
@@ -11,6 +11,9 @@ const Appbar = ({flyMap})=>{
                 <Button variant='contained' sx={{backgroundColor:'orange'}} onClick={()=>{
                     flyMap(18,-77,9)
                 }}>Fly Away</Button>
+                <Button variant='contained' sx={{backgroundColor:'green'}} onClick={()=>{
+                   setShow(true)
+                }}>Details</Button>
                 <Box sx={{ flexGrow: 1 }}></Box>
                 <Typography
                     sx={{
@@ -26,7 +29,7 @@ const Appbar = ({flyMap})=>{
                     variant="h3"
                     color="text.primary"
                     >
-                    Guns
+                    Jamaica Gunshot Alert System
                 </Typography>
                 <Box sx={{ flexGrow: 1 }}></Box>
                 </Toolbar>
