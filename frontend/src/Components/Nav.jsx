@@ -10,7 +10,7 @@ import RecentGunShots from './RecentGunShots';
 const darkTheme = createTheme({ palette: { mode: 'dark' } });
 const lightTheme = createTheme({ palette: { mode: 'light' } });
 
-const Nav = ({gunShots, setGunShot, flyMap}) =>{
+const Nav = ({gunShots, setGunShot, flyMap, setShow}) =>{
 
     return (
         <div id="b-bar">
@@ -20,7 +20,7 @@ const Nav = ({gunShots, setGunShot, flyMap}) =>{
                         <Paper sx={{ maxHeight: '85vh', overflow: 'auto' }} elevation={3}>
                             <List>
                                 {gunShots.map(gunShot =>(
-                                    <RecentGunShots key={gunShot.id} gunShot={gunShot} setGunShot={setGunShot} flyMap={flyMap}/>
+                                    <RecentGunShots key={gunShot.id} gunShot={gunShot} setGunShot={setGunShot} flyMap={flyMap} setShow={setShow}/>
                                 ))}
                             </List>
                         </Paper>

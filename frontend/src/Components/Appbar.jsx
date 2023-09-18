@@ -9,11 +9,11 @@ const Appbar = ({flyMap, setShow})=>{
             <AppBar position='static'>
                 <Toolbar sx={{minHeight: '48px'}}>
                 <Button variant='contained' sx={{backgroundColor:'orange'}} onClick={()=>{
-                    flyMap(18,-77,9)
+                    flyMap(18.1,-77.3,9)
                 }}>Fly Away</Button>
-                <Button variant='contained' sx={{backgroundColor:'green'}} onClick={()=>{
+                {/* <Button variant='contained' sx={{backgroundColor:'green'}} onClick={()=>{
                    setShow(true)
-                }}>Details</Button>
+                }}>Details</Button> */}
                 <Box sx={{ flexGrow: 1 }}></Box>
                 <Typography
                     sx={{

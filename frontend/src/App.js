@@ -31,14 +31,14 @@ const App = () => {
   const [gunShot, setGunShot] = useState({
     ID: 0,
     prob : 0,
-    parish: "KN",
-    location: "RockFort",
-    geo: [18, -77],
+    parish: "",
+    location: "",
+    geo: [0, 0],
     probs: {
-      AK12 : 0.1,
-      M4: 0.3,
-      IMI: 0.4,
-      MP5: 0.2,
+      AK12 : 0,
+      M4: 0,
+      IMI: 0,
+      MP5: 0,
       Other: 0
     }
   })
@@ -47,11 +47,30 @@ const App = () => {
 
   useEffect(() => {
     const fakeGunShots = [
-      { ID: 1, prob: 0.7, geo: [18.1, -77.1], parish:"KN", location: "RockFort", probs: { /* ... */ } },
-      { ID: 2, prob: 0.4, geo: [18.2, -77.2], parish: "JM", location: "Bogue Heights", probs: { /* ... */ } },
+      { ID: 1, prob: 0.7, geo: [18.050310015993215, -76.73901336400534], parish:"KN", location: "RockFort", probs: {
+        AK12 : 0.1,
+        M4: 0.3,
+        IMI: 0.4,
+        MP5: 0.2,
+        Other: 0
+      } },
+      { ID: 2, prob: 0.4, geo: [18.387227121312378, -77.85155660370907], parish: "JM", location: "Bogue Heights", probs: {
+        AK12 : 0.1,
+        M4: 0.9,
+        IMI: 0.0,
+        MP5: 0.0,
+        Other: 0
+      } },
+      { ID: 3, prob: 0.6, geo:  [18.037148848846197, -77.29961057965699], parish: "CL", location: "Hayes", probs: {
+        AK12 : 0.2,
+        M4: 0.1,
+        IMI: 0.25,
+        MP5: 0.05,
+        Other: 0.04
+      } }
+      
     ];
-  
-    // Simulate incoming data every 5 seconds
+
     const interval = setInterval(() => {
       setGunShots(fakeGunShots);
     }, 5000);
