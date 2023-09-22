@@ -7,7 +7,7 @@ import { jaData } from './Data/jaData';
 import { MapContainer, TileLayer, useMap, Polygon } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import { Box, Modal, Typography, Paper} from '@mui/material';
-
+import io from 'socket.io-client';
 
 const centers =  {
   ja: [18.19368269899244, -77.39527725784035]
@@ -76,6 +76,23 @@ const App = () => {
     }, 5000);
   
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    // Initialize WebSocket connection
+    const socket = io('192.168.4.108:8000/ws/chat/gunsession/');  // Replace with your Django server URL
+
+    // Listen for the "gunshotDetected" event from the server
+    socket.on('gunshotDetected', (data) => {
+      console.log('Gunshot detected:', data);
+      alert(data)
+      // Do something with the data
+    });
+
+    // Cleanup: Disconnect the WebSocket when the component unmounts
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const SetMap = () => {
