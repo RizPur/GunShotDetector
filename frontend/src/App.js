@@ -84,22 +84,46 @@ const App = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // useEffect(() => {
+  //   // Initialize WebSocket connection
+  //   const socket = io('192.168.4.108:8000/ws/chat/gunsession/');  // Replace with your Django server URL
+
+  //   // Listen for the "gunshotDetected" event from the server
+  //   socket.on('gunshotDetected', (data) => {
+  //     console.log('Gunshot detected:', data);
+  //     alert(data)
+  //     // Do something with the data
+  //   });
+
+  //   // Cleanup: Disconnect the WebSocket when the component unmounts
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
+
   useEffect(() => {
-    // Initialize WebSocket connection
-    const socket = io('localhost:8000/ws/chat/gunsession/');  // Replace with your Django server URL
+    const ws = new WebSocket('ws://192.168.4.108:8000/ws/chat/gunsession/');
 
-    // Listen for the "gunshotDetected" event from the server
-    socket.on('gunshotDetected', (data) => {
-      console.log('Gunshot detected:', data);
-      alert(data)
-      // Do something with the data
-    });
-
-    // Cleanup: Disconnect the WebSocket when the component unmounts
-    return () => {
-      socket.disconnect();
+    ws.onopen = () => {
+      console.log('Connected to the WebSocket');
     };
-  }, []);
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      console.log('Received:', message);
+      alert(message)
+    };
+
+    ws.onclose = () => {
+      console.log('Disconnected from the WebSocket');
+    };
+
+    // Cleanup: close the WebSocket if the component unmounts
+    return () => {
+      ws.close();
+    };
+  }, []); // Empty dependency array means this useEffect runs once when the component mounts
+
 
   const SetMap = () => {
     const map = useMap();
