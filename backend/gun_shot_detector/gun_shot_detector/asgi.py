@@ -7,6 +7,7 @@ For more information on this file, see
 https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 """
 
+from channels.middleware import BaseMiddleware
 import os
 
 from channels.routing import ProtocolTypeRouter, URLRouter
@@ -27,3 +28,14 @@ application = ProtocolTypeRouter({
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(URLRouter(websocket_urlpatterns))),
 })
+
+
+# from channels.middleware import ProtocolTypeMiddleware, BaseMiddleware
+
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gun_detector.settings')  # Replace 'your_project' with your project name
+
+
+class CORSMiddleware(BaseMiddleware):
+    async def __call__(self, scope, receive, send):
+        scope['headers'].append((b'Access-Control-Allow-Origin', b'*'))
+        return await super().__call__(scope, receive, send)
