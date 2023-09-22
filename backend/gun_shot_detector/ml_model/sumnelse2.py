@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset, random_split
+import torch.nn.functional as F  # Import the functional API
 
 # Functions for MFCC extraction and padding
 
@@ -100,6 +101,8 @@ model.load_state_dict(torch.load('best_audio_model.pth'))
 model.eval()
 
 
+import torch.nn.functional as F  # Import the functional API
+
 def predict_from_file(filename):
     y, sr = librosa.load(filename, sr=44100)  # Load the audio file
     mfccs = extract_mfccs(y, sr)
@@ -108,10 +111,12 @@ def predict_from_file(filename):
         0).unsqueeze(0).float().to(device)
     return model(mfccs_tensor)
 
-
-# audio_file_path = "/Users/dawei/Documents/AI\ Hackathon/ml_model/Gun\ audio/AK-47/1\ (1).wav"
 audio_file_path = "./gunshots/Pistol/IP_001A_S06.wav"
 model_output = predict_from_file(audio_file_path)
+
+# Apply softmax to get probabilities
+probabilities = F.softmax(model_output, dim=1).squeeze().cpu().detach().numpy()
+
 # Get the index of the maximum value in the output tensor
 predicted_index = torch.argmax(model_output).item()
 
@@ -119,8 +124,7 @@ predicted_index = torch.argmax(model_output).item()
 predicted_gun_type = unique_labels[predicted_index]
 
 print(f"Predicted gun type: {predicted_gun_type}")
-print(model_output)
 
-
-# Files that work
-# audio_file_path = "./gunshots/Pistol/IP_001A_S06.wav"
+# Print probabilities
+for i, label in enumerate(unique_labels):
+    print(f"Probability of {label}: {probabilities[i]:.4f}")
