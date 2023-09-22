@@ -8,15 +8,13 @@ import torch
 from torch.utils.data import random_split, TensorDataset, DataLoader
 import torch.optim as optim
 import pickle
-
+import torch.nn.functional as F
 
 def extract_mfccs(y, sr):
     return librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
 
-
 def augment_audio(y):
     return librosa.effects.time_stretch(y, rate=0.9)
-
 
 def pad_mfcc(mfcc, max_length):
     if mfcc.shape[1] < max_length:
@@ -25,7 +23,6 @@ def pad_mfcc(mfcc, max_length):
     else:
         mfcc = mfcc[:, :max_length]
     return mfcc
-
 
 all_files = []
 for subdir, _, files in os.walk('gunshots'):
@@ -43,10 +40,8 @@ MAX_LENGTH = max(all_lengths)
 
 # Create an HDF5 file to store the MFCCs and labels
 with h5py.File('mfcc_data.h5', 'w') as hf:
-    mfccs_dset = hf.create_dataset("mfccs", (0, 13, MAX_LENGTH), maxshape=(
-        None, 13, MAX_LENGTH), dtype='float32', chunks=True)
-    labels_dset = hf.create_dataset("labels", (0,), maxshape=(
-        None,), dtype=h5py.string_dtype(encoding='utf-8'), chunks=True)
+    mfccs_dset = hf.create_dataset("mfccs", (0, 13, MAX_LENGTH), maxshape=(None, 13, MAX_LENGTH), dtype='float32', chunks=True)
+    labels_dset = hf.create_dataset("labels", (0,), maxshape=(None,), dtype=h5py.string_dtype(encoding='utf-8'), chunks=True)
 
     scaler = StandardScaler()
 
@@ -61,13 +56,12 @@ with h5py.File('mfcc_data.h5', 'w') as hf:
         augmented_mfccs = pad_mfcc(augmented_mfccs, MAX_LENGTH)
 
         # Reshape for scaling
-        combined_mfccs = np.array(
-            [mfccs, augmented_mfccs]).reshape(-1, MAX_LENGTH * 13)
+        combined_mfccs = np.array([mfccs, augmented_mfccs]).reshape(-1, MAX_LENGTH * 13)
+        print(f"Training combined_mfccs shape: {combined_mfccs.shape}")
 
         # Partially fit and transform using the scaler
         scaler.partial_fit(combined_mfccs)
-        scaled_mfccs = scaler.transform(
-            combined_mfccs).reshape(-1, 13, MAX_LENGTH)
+        scaled_mfccs = scaler.transform(combined_mfccs).reshape(-1, 13, MAX_LENGTH)
 
         # Append to the HDF5 dataset
         mfccs_dset.resize((idx*2)+2, axis=0)
@@ -76,7 +70,7 @@ with h5py.File('mfcc_data.h5', 'w') as hf:
         label = os.path.basename(os.path.dirname(file))
         labels_dset.resize((idx*2)+2, axis=0)
         labels_dset[idx*2:idx*2+2] = [label, label]
-
+    
     with open('scaler.pkl', 'wb') as f:
         pickle.dump(scaler, f)
 
@@ -108,7 +102,7 @@ class AudioModel(nn.Module):
         x = nn.ReLU()(self.fc1(x))
         x = self.fc2(x)
         return x
-
+    
 
 def train_model(model, train_loader, val_loader, device, optimizer, criterion, num_epochs=75, early_stopping_patience=5, save_path='best_model.pth'):
     """Train the model with early stopping and save the best model."""
@@ -153,55 +147,72 @@ def train_model(model, train_loader, val_loader, device, optimizer, criterion, n
             print("Early stopping triggered.")
             break
 
-    return model
+        print("model from training")
+        print(model)
 
+    return model
 
 def test_model(audio_file_path, model_path, scaler, num_classes=3):
     # Load the audio file
     y, sr = librosa.load(audio_file_path)
-
+    
     # Extract MFCCs
     mfccs = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
-
+    
     # Pad the MFCCs
-    # You'll need to set this to whatever value you used during training
-    max_length = MAX_LENGTH
+    max_length = 95  # You'll need to set this to whatever value you used during training
     if mfccs.shape[1] < max_length:
         padding = np.zeros((mfccs.shape[0], max_length - mfccs.shape[1]))
         mfccs = np.hstack((mfccs, padding))
     else:
         mfccs = mfccs[:, :max_length]
-
+    
     # Scale the MFCCs
     # mfccs = scaler.transform(mfccs.T).T.reshape(1, 13, max_length)
 
     # Reshape for scaling, similar to what you did during training
     mfccs_reshaped = mfccs.T.reshape(-1, 13 * max_length)
+    # print(f"Testing mfccs_reshaped shape: {mfccs_reshaped.shape}")
+
 
     # Scale the MFCCs
     scaled_mfccs = scaler.transform(mfccs_reshaped)
 
     # Reshape back to original shape
     mfccs = scaled_mfccs.reshape(1, 13, max_length)
-
+    
     # Convert to tensor
     mfccs_tensor = torch.tensor(mfccs).unsqueeze(0).float()
 
     # Load the model
     model = AudioModel(num_classes=num_classes)
+    dummy_input = torch.randn(1, 1, 13, MAX_LENGTH).to(device)  # Replace MAX_LENGTH with the actual value
+    model(dummy_input)  # This will initialize fc1
+    print("model from test")
+    print(model)
     model.load_state_dict(torch.load(model_path))
     model.eval()
 
+   
+    
     # Make the prediction
     with torch.no_grad():
         output = model(mfccs_tensor)
-        predicted_class = torch.argmax(output).item()
-
+        
+        # Convert the raw output to probabilities
+        probabilities = F.softmax(output, dim=1)
+        
+        # Get the class with the highest probability
+        predicted_class = torch.argmax(probabilities).item()
+    
     # Map the prediction to the actual class name (you'll need to define this mapping)
-    class_mapping = {0: 'Carbine', 1: 'Revolver', 2: 'Pistol'}
+    class_mapping = {0: 'Carbine', 1: 'Pistol', 2: 'Revolver'}
     predicted_class_name = class_mapping[predicted_class]
-
+    
     print(f"The predicted class is: {predicted_class_name}")
+    print(f"Probabilities: {probabilities.squeeze().cpu().numpy()}")  # Convert tensor to numpy array
+
+
 
 
 with h5py.File('mfcc_data.h5', 'r') as hf:
@@ -245,13 +256,16 @@ num_epochs = 75  # Set a large number of epochs
 # Stop if validation loss doesn't improve for 10 consecutive epochs
 early_stopping_patience = 10
 model_save_path = 'best_audio_model.pth'
-train_model(model, train_loader, val_loader, device, optimizer,
-            criterion, num_epochs, early_stopping_patience, model_save_path)
+# train_model(model, train_loader, val_loader, device, optimizer,
+#             criterion, num_epochs, early_stopping_patience, model_save_path)
 
 
 # Example usage
 # scaler = StandardScaler()  # You'll need to load the actual scaler used during training
 with open('scaler.pkl', 'rb') as f:
     loaded_scaler = pickle.load(f)
-test_model('./gunshots/carbine/IP_003A_S01.wav',
-           './best_audio_model.pth', loaded_scaler)
+test_model('./gunshots/carbine/IP_003A_S01.wav', './best_audio_model.pth', loaded_scaler)
+
+
+# Files that work
+#'./gunshots/carbine/IP_003A_S01.wav'
