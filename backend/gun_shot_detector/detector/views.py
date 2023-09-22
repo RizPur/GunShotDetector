@@ -44,6 +44,7 @@ class GunShotStationViewSet(viewsets.ModelViewSet):
 
 
 def initiate_client(data):
-    ws = create_connection("ws://localhost:8000/ws/chat/gunsession/")
+    # ws = create_connection("ws://localhost:8000/ws/chat/gunsession/")
+    ws = create_connection("ws://192.168.4.108:8000/ws/chat/gunsession/")
     ws.send(json.dumps({"message": data}))
     ws.close()
