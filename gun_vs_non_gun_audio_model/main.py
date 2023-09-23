@@ -25,10 +25,12 @@ def pad_mfcc(mfcc, max_length):
     return mfcc
 
 all_files = []
-for subdir, _, files in os.walk('gunshots'):
+for subdir, _, files in os.walk('audios'): #put all guns into all_files
     for file in files:
         if file.endswith('.wav'):
             all_files.append(os.path.join(subdir, file))
+
+print(" all_files:", all_files)
 
 # Determine the MAX_LENGTH for all files
 all_lengths = []
@@ -79,7 +81,7 @@ print("Scaler saved to scaler.pkl")
 
 
 class AudioModel(nn.Module):
-    def __init__(self, num_classes=3):
+    def __init__(self, num_classes=2):
         super(AudioModel, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
