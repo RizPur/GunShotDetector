@@ -223,7 +223,7 @@ def test_model(audio_file_path, model_path, scaler, num_classes=3):
         predicted_class = torch.argmax(probabilities).item()
 
     # Map the prediction to the actual class name (you'll need to define this mapping)
-    class_mapping = {0: 'Carbine', 1: 'Pistol', 2: 'Revolver'}
+    class_mapping = {0: 'AK-12', 1: 'IMI Desert Eagle', 2: 'MG-42'}
     predicted_class_name = class_mapping[predicted_class]
 
     print(f"The predicted class is: {predicted_class_name}")
