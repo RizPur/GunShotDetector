@@ -1,0 +1,52 @@
+
+main.py
+
+MFCC Extraction:
+The code takes audio files and extracts features called MFCCs. Think of MFCCs as a way to summarize the audio's characteristics.
+Audio Augmentation:
+The code slightly changes the audio to create a "stretched" version. This gives more data to work with.
+Padding MFCCs:
+Since audio files can be of different lengths, the code makes sure the extracted MFCCs are of the same size by adding some zeros.
+Data Collection and Preprocessing:
+The code looks for all .wav audio files in a folder named 'gunshots'.
+For each audio file, it extracts MFCCs, changes the audio a bit, and then extracts MFCCs again.
+These MFCCs are then saved in a file called mfcc_data.h5 along with their labels (like the name of the folder they came from).
+Output:
+All the processed audio data (MFCCs) and their labels are saved in a file named mfcc_data.h5.
+What can you do with the mfcc_data.h5 file?
+
+Train Machine Learning Models: Use the data in the file to teach a computer how to recognize different types of audio.
+Data Analysis: Look at the data to understand patterns in the audio.
+Transfer Data: The file format makes it easy to share or move the data to other programs or systems.
+In short, the code processes audio files to extract important features and saves them in a file. This file can be used to train computers to recognize audio or to analyze the audio data.
+
+_____________________________________________________________________________________________________
+
+audio_processing.py
+
+Batch Loading:
+The function load_audio_data_from_directory loads audio files in batches. This is useful when dealing with a large number of files to avoid memory issues.
+Feature Extraction:
+For each audio file, the code extracts MFCCs using the extract_mfccs function. MFCCs are a way to summarize the audio's characteristics.
+Audio Augmentation:
+The code creates a "stretched" version of the audio using the augment_audio function. This provides more data for training.
+Padding:
+The pad_mfcc function ensures that all MFCCs are of the same length by adding zeros if needed.
+Data Collection and Preprocessing:
+The code looks for all .wav audio files in a folder named 'gunshots'.
+For each batch of audio files, it extracts MFCCs, creates a stretched version of the audio, and then extracts MFCCs again.
+These MFCCs are then standardized (scaled) using the StandardScaler from scikit-learn.
+Data Splitting:
+After processing all batches, the data is split into training and validation sets using train_test_split. This is useful for training a machine learning model and then validating its performance.
+Memory Management:
+After processing each batch, the code cleans up variables to free up memory using the gc.collect() function.
+Output:
+The code prints the shapes of the training and validation data sets.
+In simpler terms:
+The code processes batches of audio files from the 'gunshots' directory. For each audio file, it extracts features and also creates a modified version of the audio to extract more features. All this data is then standardized and split into training and validation sets. The purpose is to prepare the data for training a machine learning model that can recognize or classify audio based on its features.
+
+
+
+
+check it again!!!!!!!!!!!!!!!!!!
+
