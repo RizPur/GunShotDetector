@@ -14,7 +14,7 @@ def extract_mfccs(y, sr):
     return librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
 
 def augment_audio(y):
-    return librosa.effects.time_stretch(y, rate=0.9)
+    return librosa.effects.time_stretch(y, rate=1)
 
 def pad_mfcc(mfcc, max_length):
     if mfcc.shape[1] < max_length:
@@ -41,47 +41,53 @@ for file in all_files:
 MAX_LENGTH = max(all_lengths)
 
 # Create an HDF5 file to store the MFCCs and labels
-with h5py.File('mfcc_data.h5', 'w') as hf:
-    mfccs_dset = hf.create_dataset("mfccs", (0, 13, MAX_LENGTH), maxshape=(None, 13, MAX_LENGTH), dtype='float32', chunks=True)
-    labels_dset = hf.create_dataset("labels", (0,), maxshape=(None,), dtype=h5py.string_dtype(encoding='utf-8'), chunks=True)
+def h5_file_creation():
 
-    scaler = StandardScaler()
+    with h5py.File('mfcc_data.h5', 'w') as hf:
+        mfccs_dset = hf.create_dataset("mfccs", (0, 13, MAX_LENGTH), maxshape=(
+            None, 13, MAX_LENGTH), dtype='float32', chunks=True)
+        labels_dset = hf.create_dataset("labels", (0,), maxshape=(
+            None,), dtype=h5py.string_dtype(encoding='utf-8'), chunks=True)
 
-    for idx, file in enumerate(all_files):
-        y, sr = librosa.load(file)
-        mfccs = extract_mfccs(y, sr)
-        y_stretched = augment_audio(y)
-        augmented_mfccs = extract_mfccs(y_stretched, sr)
+        scaler = StandardScaler()
 
-        # Pad the MFCCs to the determined length
-        mfccs = pad_mfcc(mfccs, MAX_LENGTH)
-        augmented_mfccs = pad_mfcc(augmented_mfccs, MAX_LENGTH)
+        for idx, file in enumerate(all_files):
+            y, sr = librosa.load(file)
+            mfccs = extract_mfccs(y, sr)
+            y_stretched = augment_audio(y)
+            augmented_mfccs = extract_mfccs(y_stretched, sr)
 
-        # Reshape for scaling
-        combined_mfccs = np.array([mfccs, augmented_mfccs]).reshape(-1, MAX_LENGTH * 13)
-        print(f"Training combined_mfccs shape: {combined_mfccs.shape}")
+            # Pad the MFCCs to the determined length
+            mfccs = pad_mfcc(mfccs, MAX_LENGTH)
+            augmented_mfccs = pad_mfcc(augmented_mfccs, MAX_LENGTH)
 
-        # Partially fit and transform using the scaler
-        scaler.partial_fit(combined_mfccs)
-        scaled_mfccs = scaler.transform(combined_mfccs).reshape(-1, 13, MAX_LENGTH)
+            # Reshape for scaling
+            combined_mfccs = np.array(
+                [mfccs, augmented_mfccs]).reshape(-1, MAX_LENGTH * 13)
+            print(f"Training combined_mfccs shape: {combined_mfccs.shape}")
 
-        # Append to the HDF5 dataset
-        mfccs_dset.resize((idx*2)+2, axis=0)
-        mfccs_dset[idx*2:idx*2+2] = scaled_mfccs
+            # Partially fit and transform using the scaler
+            scaler.partial_fit(combined_mfccs)
+            scaled_mfccs = scaler.transform(
+                combined_mfccs).reshape(-1, 13, MAX_LENGTH)
 
-        label = os.path.basename(os.path.dirname(file))
-        labels_dset.resize((idx*2)+2, axis=0)
-        labels_dset[idx*2:idx*2+2] = [label, label]
-    
-    with open('scaler.pkl', 'wb') as f:
-        pickle.dump(scaler, f)
+            # Append to the HDF5 dataset
+            mfccs_dset.resize((idx*2)+2, axis=0)
+            mfccs_dset[idx*2:idx*2+2] = scaled_mfccs
 
-print("MFCCs and labels saved to mfcc_data.h5")
-print("Scaler saved to scaler.pkl")
+            label = os.path.basename(os.path.dirname(file))
+            labels_dset.resize((idx*2)+2, axis=0)
+            labels_dset[idx*2:idx*2+2] = [label, label]
+
+        with open('scaler.pkl', 'wb') as f:
+            pickle.dump(scaler, f)
+
+    print("MFCCs and labels saved to mfcc_data.h5")
+    print("Scaler saved to scaler.pkl")
 
 
 class AudioModel(nn.Module):
-    def __init__(self, num_classes=2):
+    def _init_(self, num_classes=2):
         super(AudioModel, self).__init__()
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
@@ -106,7 +112,7 @@ class AudioModel(nn.Module):
         return x
     
 
-def train_model(model, train_loader, val_loader, device, optimizer, criterion, num_epochs=75, early_stopping_patience=5, save_path='best_model.pth'):
+def train_model(model, train_loader, val_loader, device, optimizer, criterion, num_epochs=10, early_stopping_patience=5, save_path='best_model.pth'):
     """Train the model with early stopping and save the best model."""
     best_val_loss = float('inf')
     patience_counter = 0
@@ -154,7 +160,7 @@ def train_model(model, train_loader, val_loader, device, optimizer, criterion, n
 
     return model
 
-def test_model(audio_file_path, model_path, scaler, num_classes=3):
+def test_model(audio_file_path, model_path, scaler, num_classes=2):
     # Load the audio file
     y, sr = librosa.load(audio_file_path)
     
@@ -188,6 +194,7 @@ def test_model(audio_file_path, model_path, scaler, num_classes=3):
 
     # Load the model
     model = AudioModel(num_classes=num_classes)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dummy_input = torch.randn(1, 1, 13, MAX_LENGTH).to(device)  # Replace MAX_LENGTH with the actual value
     model(dummy_input)  # This will initialize fc1
     print("model from test")
@@ -208,65 +215,67 @@ def test_model(audio_file_path, model_path, scaler, num_classes=3):
         predicted_class = torch.argmax(probabilities).item()
     
     # Map the prediction to the actual class name (you'll need to define this mapping)
-    class_mapping = {0: 'Carbine', 1: 'Pistol', 2: 'Revolver'}
+    class_mapping = {0: 'gun', 1: 'non-gun'}
     predicted_class_name = class_mapping[predicted_class]
     
     print(f"The predicted class is: {predicted_class_name}")
     print(f"Probabilities: {probabilities.squeeze().cpu().numpy()}")  # Convert tensor to numpy array
 
 
+def setting_up_data():
+    with h5py.File('mfcc_data.h5', 'r') as hf:
+        data = np.array(hf['mfccs'][:])
+        labels = np.array(hf['labels'][:])
+
+    # Convert labels to integers
+    unique_labels = list(set(labels))
+    label_to_int = {label: i for i, label in enumerate(unique_labels)}
+    labels = np.array([label_to_int[label] for label in labels])
+
+    # Splitting data into training, validation, and testing
+    train_size = int(0.7 * len(data))
+    val_size = int(0.1 * len(data))
+    test_size = len(data) - train_size - val_size
+    train_data, val_data, test_data = random_split(
+        data, [train_size, val_size, test_size])
+    train_labels, val_labels, test_labels = random_split(
+        labels, [train_size, val_size, test_size])
+
+    # Convert the data to tensors and add a channel dimension
+    train_data = torch.tensor(train_data).unsqueeze(1).float()
+    val_data = torch.tensor(val_data).unsqueeze(1).float()
+    test_data = torch.tensor(test_data).unsqueeze(1).float()
+
+    train_dataset = TensorDataset(train_data, torch.tensor(train_labels))
+    val_dataset = TensorDataset(val_data, torch.tensor(val_labels))
+    test_dataset = TensorDataset(test_data, torch.tensor(test_labels))
+
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+
+    # Model Training with early stopping and saving
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = AudioModel(len(unique_labels)).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    num_epochs = 10  # Set a large number of epochs
+    # Stop if validation loss doesn't improve for 10 consecutive epochs
+    early_stopping_patience = 5
+    model_save_path = 'best_audio_model.pth'
+
+    train_model(model, train_loader, val_loader, device, optimizer,
+                criterion, num_epochs, early_stopping_patience, model_save_path)
 
 
-with h5py.File('mfcc_data.h5', 'r') as hf:
-    data = np.array(hf['mfccs'][:])
-    labels = np.array(hf['labels'][:])
-
-# Convert labels to integers
-unique_labels = list(set(labels))
-label_to_int = {label: i for i, label in enumerate(unique_labels)}
-labels = np.array([label_to_int[label] for label in labels])
-
-# Splitting data into training, validation, and testing
-train_size = int(0.7 * len(data))
-val_size = int(0.1 * len(data))
-test_size = len(data) - train_size - val_size
-train_data, val_data, test_data = random_split(
-    data, [train_size, val_size, test_size])
-train_labels, val_labels, test_labels = random_split(
-    labels, [train_size, val_size, test_size])
-
-# Convert the data to tensors and add a channel dimension
-train_data = torch.tensor(train_data).unsqueeze(1).float()
-val_data = torch.tensor(val_data).unsqueeze(1).float()
-test_data = torch.tensor(test_data).unsqueeze(1).float()
-
-train_dataset = TensorDataset(train_data, torch.tensor(train_labels))
-val_dataset = TensorDataset(val_data, torch.tensor(val_labels))
-test_dataset = TensorDataset(test_data, torch.tensor(test_labels))
-
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-
-# Model Training with early stopping and saving
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = AudioModel(len(unique_labels)).to(device)
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
-
-num_epochs = 75  # Set a large number of epochs
-# Stop if validation loss doesn't improve for 10 consecutive epochs
-early_stopping_patience = 10
-model_save_path = 'best_audio_model.pth'
-# train_model(model, train_loader, val_loader, device, optimizer,
-#             criterion, num_epochs, early_stopping_patience, model_save_path)
+h5_file_creation()
+setting_up_data()
 
 
-# Example usage
-# scaler = StandardScaler()  # You'll need to load the actual scaler used during training
 with open('scaler.pkl', 'rb') as f:
     loaded_scaler = pickle.load(f)
-test_model('./gunshots/carbine/IP_003A_S01.wav', './best_audio_model.pth', loaded_scaler)
+test_model('./audios/guns/1 (1).wav', './best_audio_model.pth', loaded_scaler)
 
 
 # Files that work
