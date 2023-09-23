@@ -125,3 +125,6 @@ django/server/.env.production
 django/backups/
 **/.DS_Store
 **/.vscode/
+
+
+ml_model/gunshots/others/*
