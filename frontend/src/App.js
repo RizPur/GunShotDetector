@@ -7,11 +7,41 @@ import { jaData } from './Data/jaData';
 import { MapContainer, TileLayer, useMap, Polygon } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import { Box, Modal, Typography, Paper } from '@mui/material';
-import io from 'socket.io-client';
 
 const centers = {
   ja: [18.19368269899244, -77.39527725784035]
 };
+
+const fakeGunShots = [
+  {
+    ID: 1, prob: 0.7, geo: [18.06840501211612, -77.02277244847099], parish: "CA", "dateTime": "2023-02-27T10:43:00Z", location: "Greater Portmore", probs: {
+      AK12: 0.1,
+      M4: 0.6,
+      IMI: 0.1,
+      MP5: 0.2,
+      Other: 0
+    }
+  },
+  {
+    ID: 2, prob: 0.4, geo: [18.387227121312378, -77.85155660370907], parish: "JM", "dateTime": "2023-09-18T18:05:00Z", location: "Bogue Heights", probs: {
+      AK12: 0.1,
+      M4: 0.9,
+      IMI: 0.0,
+      MP5: 0.0,
+      Other: 0
+    }
+  },
+  {
+    ID: 3, prob: 0.6, geo: [18.037148848846197, -77.29961057965699], parish: "CL", "dateTime": "2023-09-12T11:27:00Z", location: "Hayes", probs: {
+      AK12: 0.2,
+      M4: 0.1,
+      IMI: 0.25,
+      MP5: 0.05,
+      Other: 0.04
+    }
+  }
+
+];
 
 const style = {
   position: 'absolute',
@@ -42,77 +72,42 @@ const App = () => {
       Other: 0
     }
   })
-  const [gunShots, setGunShots] = useState([])
+  const [gunShots, setGunShots] = useState(fakeGunShots)
   const [show, setShow] = useState(false)
 
-  useEffect(() => {
-    const fakeGunShots = [
-      {
-        ID: 1, prob: 0.7, geo: [18.050310015993215, -76.73901336400534], parish: "KN", location: "RockFort", probs: {
-          AK12: 0.1,
-          M4: 0.3,
-          IMI: 0.4,
-          MP5: 0.2,
-          Other: 0
-        }
-      },
-      {
-        ID: 2, prob: 0.4, geo: [18.387227121312378, -77.85155660370907], parish: "JM", location: "Bogue Heights", probs: {
-          AK12: 0.1,
-          M4: 0.9,
-          IMI: 0.0,
-          MP5: 0.0,
-          Other: 0
-        }
-      },
-      {
-        ID: 3, prob: 0.6, geo: [18.037148848846197, -77.29961057965699], parish: "CL", location: "Hayes", probs: {
-          AK12: 0.2,
-          M4: 0.1,
-          IMI: 0.25,
-          MP5: 0.05,
-          Other: 0.04
-        }
-      }
-
-    ];
-
-    const interval = setInterval(() => {
-      setGunShots(fakeGunShots);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   // useEffect(() => {
-  //   // Initialize WebSocket connection
-  //   const socket = io('192.168.4.108:8000/ws/chat/gunsession/');  // Replace with your Django server URL
 
-  //   // Listen for the "gunshotDetected" event from the server
-  //   socket.on('gunshotDetected', (data) => {
-  //     console.log('Gunshot detected:', data);
-  //     alert(data)
-  //     // Do something with the data
-  //   });
+  //   const interval = setInterval(() => {
+  //     setGunShots(fakeGunShots);
+  //   }, 3000);
 
-  //   // Cleanup: Disconnect the WebSocket when the component unmounts
-  //   return () => {
-  //     socket.disconnect();
-  //   };
+  //   return () => clearInterval(interval);
   // }, []);
 
+
   useEffect(() => {
-    const ws = new WebSocket('ws://192.168.4.108:8000/ws/chat/gunsession/');
+    const ws = new WebSocket('ws://192.168.184.108:8000/ws/chat/gunsession/');
 
     ws.onopen = () => {
       console.log('Connected to the WebSocket');
     };
 
     ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
+      const data = JSON.parse(event.data);
+      const message = data.message;
       console.log('Received:', message);
-      alert(message)
+    
+      if (message && message.geo) {
+        const [x, y] = message.geo;
+        setGunShot(message)
+        // console.log(gunShot)
+        flyMap(x, y, 11);
+      }
+    
+      setGunShots(prevGunshots => [...prevGunshots, message]);
+      console.log(gunShot,gunShots)
     };
+    
 
     ws.onclose = () => {
       console.log('Disconnected from the WebSocket');
@@ -123,6 +118,15 @@ const App = () => {
       ws.close();
     };
   }, []); // Empty dependency array means this useEffect runs once when the component mounts
+
+  useEffect(() => {
+    console.log("Updated gunShot:", gunShot);
+  }, [gunShot]);
+  
+  useEffect(() => {
+    console.log("Updated gunShots:", gunShots);
+  }, [gunShots]);
+  
 
 
   const SetMap = () => {

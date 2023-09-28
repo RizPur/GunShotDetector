@@ -36,6 +36,7 @@ const GunChart = ({ gunShot }) => {
             <CardContent>
                 <Typography variant="body2">Probability: {gunShot.prob}</Typography>
                 <Typography variant="body2">Parish: {gunShot.parish}</Typography>
+                <Typography variant="body2">Date: {gunShot.dateTime}</Typography>
                 <Typography variant="body2">Location: {gunShot.location}</Typography>
                 <Typography variant="body2">Geo: [{gunShot.geo.join(", ")}]</Typography>
             </CardContent>

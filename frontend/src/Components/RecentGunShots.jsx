@@ -14,7 +14,7 @@ const RecentGunShots = ({setGunShot, gunShot, flyMap, setShow}) =>{
                 }}>
                 <ListItemText 
                 primary={gunShot.location} 
-                secondary={gunShot.prob} 
+                secondary={gunShot.dateTime} 
                 />
                 </ListItemButton>
             <Divider />
