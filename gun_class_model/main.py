@@ -176,8 +176,8 @@ def test_model(audio_file_path, model_path, scaler, num_classes=3):
     # Pad the MFCCs
     # may not need if line 190 works
     # You'll need to set this to whatever value you used during training
-    max_length = 15504
-    # max_length = 95
+    # max_length = 15504
+    max_length = 95
     if mfccs.shape[1] < max_length:
         padding = np.zeros((mfccs.shape[0], max_length - mfccs.shape[1]))
         mfccs = np.hstack((mfccs, padding))
@@ -223,7 +223,7 @@ def test_model(audio_file_path, model_path, scaler, num_classes=3):
         predicted_class = torch.argmax(probabilities).item()
 
     # Map the prediction to the actual class name (you'll need to define this mapping)
-    class_mapping = {0: 'AK-12', 1: 'IMI Desert Eagle', 2: 'MG-42'}
+    class_mapping = {0: 'Carbine', 1: 'Pistol', 2: 'Revolver'}
     predicted_class_name = class_mapping[predicted_class]
 
     print(f"The predicted class is: {predicted_class_name}")
@@ -286,7 +286,7 @@ def setting_up_data():
 # scaler = StandardScaler()  # You'll need to load the actual scaler used during training
 with open('scaler.pkl', 'rb') as f:
     loaded_scaler = pickle.load(f)
-test_model('./gunshots/IMI Desert Eagle/2 (15).wav',
+test_model('./gunshots/Pistol/SA_081B_S04.wav',
            './best_audio_model.pth', loaded_scaler)
 
 

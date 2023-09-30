@@ -11,7 +11,9 @@ class GunShotViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
 
-        if serializer.validated_data.get('prob') > 60.00:
+        # commented line below to allow all audio to be classified
+        # if serializer.validated_data.get('prob') > 60.00:
+        if serializer.validated_data.get('prob'):
             gunShotDetector = GunShotDetector.objects.get(
                 pk=serializer.validated_data.get('gun_detector').pk)
 
@@ -26,10 +28,9 @@ class GunShotViewSet(viewsets.ModelViewSet):
                 "parish": gunShotDetector.parish,
                 "location": gunShotDetector.location,
                 "probs": {
-                    "ak12_gun": str(serializer.validated_data.get('ak12_gun')),
-                    "m4_gun": str(serializer.validated_data.get('m4_gun')),
-                    "imi_desert_eagle_gun": str(serializer.validated_data.get('imi_desert_eagle_gun')),
-                    "other_gun": str(serializer.validated_data.get('other_gun'))
+                    "carbine_gun": str(serializer.validated_data.get('carbine_gun')),
+                    "pistol_gun": str(serializer.validated_data.get('pistol_gun')),
+                    "revolver_gun": str(serializer.validated_data.get('revolver_gun'))
                 }
             }
 
@@ -44,7 +45,6 @@ class GunShotStationViewSet(viewsets.ModelViewSet):
 
 
 def initiate_client(data):
-    # ws = create_connection("ws://localhost:8000/ws/chat/gunsession/")
-    ws = create_connection("ws://192.168.4.108:8000/ws/chat/gunsession/")
+    ws = create_connection("ws://localhost:8000/ws/chat/gunsession/")
     ws.send(json.dumps({"message": data}))
     ws.close()

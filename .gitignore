@@ -125,3 +125,5 @@ django/server/.env.production
 django/backups/
 **/.DS_Store
 **/.vscode/
+gun_vs_non_gun_audio_model/best_audio_model.pth
+gun_vs_non_gun_audio_model/mfcc_data.h5

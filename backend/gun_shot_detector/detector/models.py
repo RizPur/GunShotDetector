@@ -18,11 +18,11 @@ class GunShot(models.Model):
         max_digits=5, decimal_places=2, validators=PERCENTAGE_VALIDATOR)
     gun_detector = models.ForeignKey(
         GunShotDetector, on_delete=models.CASCADE, verbose_name='Gun Shut Detector', null=True)
-    ak12_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
+    carbine_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
         0), validators=PERCENTAGE_VALIDATOR)
-    m4_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
+    pistol_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
         0), validators=PERCENTAGE_VALIDATOR)
-    imi_desert_eagle_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
+    revolver_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
         0), validators=PERCENTAGE_VALIDATOR)
     # m4_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
     #     0), validators=PERCENTAGE_VALIDATOR)
@@ -36,5 +36,5 @@ class GunShot(models.Model):
     #     0), validators=PERCENTAGE_VALIDATOR)
     # zastava_m92_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
     #     0), validators=PERCENTAGE_VALIDATOR)
-    other_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
-        0), validators=PERCENTAGE_VALIDATOR)
+    # other_gun = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal(
+    #     0), validators=PERCENTAGE_VALIDATOR)
