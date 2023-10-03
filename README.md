@@ -1,59 +1,72 @@
-🏆 JAIA Hackathon 2023 Winner: Gunshot Detection and Classification System
-📣 Synopsis
+## 🏆 JAIA Hackathon 2023 Winner
+
+### 📣 Synopsis - Gunshot Detection and Classification System
 
 This project won the first-ever JAIA Hackathon. It's designed to detect and classify gunshots in real-time. When a gunshot is detected, the audio is parsed, processed, and sent through two machine learning models. The first model identifies whether the sound is a gunshot or not. If it is, the second model classifies the type of gun the shot originated from. All the data, along with geolocation and timestamp, is then displayed on a real-time map interface built with React.
 🛠️ Tech Stack
 
-    Machine Learning Models: Python, Torch
-    Audio Preprocessing: Python scripts to convert .wav to MFCCs
-    Backend: Django
-    Frontend: React
-    Communication: Webhooks, Django channel server
+- Machine Learning Models: Python, Torch
+- Audio Preprocessing: Python scripts to convert .wav to MFCCs
+- Backend: Django
+- Frontend: React
+- Communication: Webhooks, Django channel server
 
-🧑‍💻 Team Roles
-🤖 Model Training and Prediction (Team)
+### 🧑‍💻 Team Roles
 
-    Model Selection: Chose CNN for audio classification.
+#### 🤖 Model Training and Prediction (Team)
 
-    python
+- Model Selection: CNN for audio classification.
 
-    # Our winning model class in Torch
-    class AudioModel(nn.Module):
-        def __init__(self, num_classes=3):
-            ...
+1. **Train Model: Used preprocessed audio data to train the model.**
+2. **Prediction: Made predictions and sent data to David's script.**
 
-    Train Model: Used preprocessed audio data to train the model.
-    Prediction: Made predictions and sent data to David's script.
+#### 🎧 Douglas: Data Collection and Preprocessing
 
-🎧 Douglas: Data Collection and Preprocessing
+- Collected audio data of common gunshots in Kingston.
+- Preprocessed the raw audio into MFCCs.
 
-    Collected audio data of common gunshots in Kingston.
-    Preprocessed the raw audio into MFCCs.
-    ```python
-    mfccs = librosa.feature.mfcc(audio_data, sr)
-    ```
-    Performed data augmentation for model robustness.
-    ```python
-    predictions = model.predict(preprocessed_audio)
-    ```
+```python
+mfccs = librosa.feature.mfcc(audio_data, sr)
+```
+Performed data augmentation for model robustness.
+```python
+predictions = model.predict(preprocessed_audio)
+```
 
-🚨 David: Alerting and Backend-Frontend Integration
+#### 🚨 David: Alerting and Backend-Frontend Integration
 
-    Created a system to alert authorities in real-time.
-    Ensured seamless communication between the Django backend, ml models, and React frontend.
-    ```python
-    if predictions.recieved(gunProb) > 0.8:
-        send_alert("Gunshot detected!: ",predictions.recieved())
-    ```
+- Created a system to alert authorities in real-time.
 
-🗺️ Joel: User Interface
+- Ensured seamless communication between the Django backend, ml models, and React frontend.
 
-    Built a real-time dashboard using React and Leaflet.
-    ```javascript
-    if (gunshot.received()) {
-        alert("Gunshot detected!");
-    }
-    ```
+```python
+def initiate_client(data):
+    ws = create_connection("ws://localhost:8000/ws/chat/gunsession/")
+    ws.send(json.dumps({"message": data}))
+    ws.close()
+```
+
+#### 🗺️ Joel: User Interface
+
+- Built a real-time dashboard using React and Leaflet.
+
+```javascript
+ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      const message = data.message;
+      console.log('Received:', message);
+    
+      if (message && message.geo) {
+        const [x, y] = message.geo;
+        setGunShot(message)
+        // console.log(gunShot)
+        flyMap(x, y, 11);
+      }
+    
+      setGunShots(prevGunshots => [...prevGunshots, message]);
+      console.log(gunShot,gunShots)
+    };
+```
 
 ---
 
@@ -124,5 +137,5 @@ sudo apt-get install redis
    ```
 
 ### 🎧 Machine Learning Models
-1. run main.py in each ml folder
+- Run main.py in each ml folder to train model.
 ---
