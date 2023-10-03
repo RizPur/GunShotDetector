@@ -86,7 +86,7 @@ const App = () => {
 
 
   useEffect(() => {
-    const ws = new WebSocket('ws://192.168.184.108:8000/ws/chat/gunsession/');
+    const ws = new WebSocket('ws://***.***.**.***:8000/ws/chat/gunsession/');
 
     ws.onopen = () => {
       console.log('Connected to the WebSocket');
