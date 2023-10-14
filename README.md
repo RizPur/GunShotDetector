@@ -1,4 +1,4 @@
-## 🏆 JAIA Hackathon 2023 Winner
+## 🏆 JAIA Hackathon 2023 Winner - Joel, Douglas, David
 
 ### 📣 Synopsis - Gunshot Detection and Classification System
 
