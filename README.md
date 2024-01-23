@@ -1,6 +1,7 @@
 ## 🏆 JAIA Hackathon 2023 Winner - Joel, Douglas, David
 
-See more info attached - https://shorturl.at/fgTZ8
+See more info attached - https://shorturl.at/gikw5
+
 ### 📣 Synopsis - Gunshot Detection and Classification System
 
 This project won the first-ever JAIA Hackathon. It's designed to detect and classify gunshots in real-time. When a gunshot is detected, the audio is parsed, processed, and sent through two machine learning models. The first model identifies whether the sound is a gunshot or not. If it is, the second model classifies the type of gun the shot originated from. All the data, along with geolocation and timestamp, is then displayed on a real-time map interface built with React.
