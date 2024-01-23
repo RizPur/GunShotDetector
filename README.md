@@ -1,4 +1,5 @@
 ## 🏆 JAIA Hackathon 2023 Winner - Joel, Douglas, David
+https://www.linkedin.com/search/results/content/?keywords=jaia%20jackathon&update=urn%3Ali%3Afs_updateV2%3A%28urn%3Ali%3Aactivity%3A7112509370600460288%2CBLENDED_SEARCH_FEED%2CEMPTY%2CDEFAULT%2Cfalse%29&lipi=urn%3Ali%3Apage%3Ad_flagship3_search_srp_all%3BjTLOkhO7Q6eg1WnN0dPfhA%3D%3D![image](https://github.com/RizPur/GunShotDetector/assets/40311007/bc0c8ee8-3aec-4f8a-8016-1bc58e69f875)
 
 ### 📣 Synopsis - Gunshot Detection and Classification System
 
